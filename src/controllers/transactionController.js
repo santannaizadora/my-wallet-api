@@ -18,6 +18,7 @@ const setTransaction = async (req, res) => {
 
 const getTransactions = async (req, res) => {
     const user = req.user
+    console.log(user)
     const userTransactions = await db.collection('transactions').find({ user: user._id }).toArray();
     const balance = userTransactions.reduce((acc, curr) => {
         if (curr.type === 'deposit') {
@@ -33,6 +34,7 @@ const getTransactions = async (req, res) => {
         return transaction;
     }
     );
+    console.log(balance)
     return res.status(200).send({ balance, transactions });
 }
 
@@ -69,5 +71,5 @@ const updateTransaction = async (req, res) => {
     return res.status(200).send("Transação atualizada com sucesso");
 }
 
-export { setTransaction, getTransactions, deleteTransaction, updateTransaction };
+export { setTransaction, getTransactions };
 
