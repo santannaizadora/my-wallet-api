@@ -10,7 +10,7 @@ const setTransaction = async (req, res) => {
         description,
         type,
         createdAt: dayjs().format('DD/MM/YYYY'),
-        user: user._id
+        user: user.userId
     }
     await db.collection('transactions').insertOne(newTransaction);
     return res.status(201).send("Transação criada com sucesso");
@@ -19,7 +19,7 @@ const setTransaction = async (req, res) => {
 const getTransactions = async (req, res) => {
     const user = req.user
     console.log(user)
-    const userTransactions = await db.collection('transactions').find({ user: user._id }).toArray();
+    const userTransactions = await db.collection('transactions').find({ user: user.userId}).toArray();
     const balance = userTransactions.reduce((acc, curr) => {
         if (curr.type === 'deposit') {
             return acc + curr.amount;
@@ -36,39 +36,6 @@ const getTransactions = async (req, res) => {
     );
     console.log(balance)
     return res.status(200).send({ balance, transactions });
-}
-
-const deleteTransaction = async (req, res) => {
-    const { id } = req.params;
-    const transaction = await db.collection('transactions').findOne({ _id: ObjectId(id) });
-    if (!transaction) {
-        return res.status(404).send("Transação não encontrada");
-    }
-    try {
-        await db.collection('transactions').deleteOne({ _id: ObjectId(id) });
-        return res.status(200).send("Transação deletada com sucesso");
-    } catch (err) {
-        return res.status(500).send("Erro ao deletar transação");
-    }
-}
-
-const updateTransaction = async (req, res) => {
-    const user = req.user
-    const { id } = req.params;
-    const { amount, description } = req.body;
-    const transaction = await db.collection('transactions').findOne({ _id: ObjectId(id) });
-    if (!transaction) {
-        return res.status(404).send("Transação não encontrada");
-    }
-    if (transaction.user.toString() !== user._id.toString()) {
-        return res.status(401).send("Não autorizado");
-    }
-    const newTransaction = {
-        amount,
-        description
-    }
-    await db.collection('transactions').updateOne({ _id: ObjectId(id) }, { $set: newTransaction });
-    return res.status(200).send("Transação atualizada com sucesso");
 }
 
 export { setTransaction, getTransactions };

@@ -4,6 +4,7 @@ import {v4 as uuid} from 'uuid';
 const login = async (req, res) => {
     try {
         const user = req.user
+        console.log(user)
         const username = user.name;
         const token = uuid();
         await db.collection("sessions").insertOne({
